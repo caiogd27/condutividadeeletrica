@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Condutividade Elétrica de Soluções — Laboratório Interativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#0B1220;
+  --panel-1:#121B30;
+  --panel-2:#182140;
+  --border:#28375C;
+  --text:#E8ECF6;
+  --text-dim:#9AA7C2;
+  --text-faint:#6B7899;
+
+  --teal:#4FD1C5;      --teal-rgb:79,209,197;
+  --amber:#F2A65A;     --amber-rgb:242,166,90;
+  --violet:#C9A6F5;    --violet-rgb:201,166,245;
+  --lightblue:#7DD3FC; --lightblue-rgb:125,211,252;
+  --yellow:#FBE38A;    --yellow-rgb:251,227,138;
+  --coral:#FF9E7A;     --coral-rgb:255,158,122;
+  --rose:#F0708A;      --rose-rgb:240,112,138;
+  --green:#6FCF97;     --green-rgb:111,207,151;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background-color:var(--bg);
+  background-image:radial-gradient(ellipse 1200px 700px at 50% -10%, #1B2947 0%, #0B1220 62%);
+  background-attachment:fixed;
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:500;}
+p{margin:0;}
+button{font-family:inherit;}
+a{color:inherit;}
+::selection{background:rgba(79,209,197,0.3);}
+
+/* focus */
+button:focus-visible, a:focus-visible, input:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:3px;
+  border-radius:6px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{scroll-behavior:auto !important;}
+  .tab-btn::after{transition:none !important;}
+  #gauge-needle-t4{transition:none !important;}
+}
+
+/* ============ LAYOUT SHELL ============ */
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+/* ============ HERO ============ */
+.hero{padding:76px 0 48px;border-bottom:1px solid var(--border);}
+.eyebrow{
+  display:flex;align-items:center;gap:12px;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text-dim);margin-bottom:22px;
+}
+.eyebrow::before{content:'';display:inline-block;width:38px;border-top:1px dashed var(--text-faint);}
+.hero-title{
+  font-size:clamp(30px,4.6vw,52px);line-height:1.12;max-width:17ch;color:var(--text);font-weight:500;
+}
+.hero-title em{font-style:italic;color:var(--teal);font-weight:500;}
+.hero-sub{
+  font-size:17px;color:var(--text-dim);max-width:56ch;margin-top:20px;line-height:1.65;
+}
+.hero-formula{
+  font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-faint);
+  margin-top:26px;padding-top:20px;border-top:1px solid var(--border);max-width:680px;
+}
+.chapter-nav{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+.chapter-link{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-dim);background:var(--panel-1);border:1px solid var(--border);
+  padding:10px 18px;border-radius:10px;text-decoration:none;transition:.2s ease;
+}
+.chapter-link:hover{border-color:var(--teal);color:var(--teal);}
+
+/* ============ TAB NAV ============ */
+.tabnav-outer{position:sticky;top:0;z-index:20;background:rgba(11,18,32,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);}
+.tabnav{display:flex;gap:4px;overflow-x:auto;padding:14px 0;scrollbar-width:thin;}
+.tabnav::-webkit-scrollbar{height:5px;}
+.tabnav::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.tab-btn{
+  position:relative;flex:0 0 auto;
+  display:flex;flex-direction:column;gap:5px;align-items:flex-start;
+  background:transparent;border:none;color:var(--text-dim);
+  padding:8px 18px 14px;cursor:pointer;transition:color .2s ease;
+}
+.tab-btn:hover{color:var(--text);}
+.tab-code{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-faint);text-transform:uppercase;}
+.tab-name{font-size:14px;white-space:nowrap;}
+.tab-btn[aria-selected="true"]{color:var(--text);}
+.tab-btn[aria-selected="true"] .tab-code{color:var(--accent);}
+.tab-btn::after{
+  content:'';position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform:scaleX(0);transition:transform .3s ease;
+}
+.tab-btn[aria-selected="true"]::after{transform:scaleX(1);}
+
+/* ============ TAB PANELS ============ */
+.tab-panel{display:none;padding:44px 0 20px;}
+.tab-panel.active{display:block;}
+.topic-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:start;}
+@media (max-width:880px){.topic-grid{grid-template-columns:1fr;}}
+
+.viz-card{
+  background:var(--panel-1);border:1px solid var(--border);border-top:2px solid var(--accent);
+  border-radius:16px;padding:22px;
+  box-shadow:0 0 46px rgba(var(--accent-rgb),0.10);
+}
+.viz-canvas{width:100%;height:340px;display:block;border-radius:12px;background:#0E1729;border:1px solid var(--border);}
+
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.btn{
+  background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  font-size:13.5px;padding:9px 15px;border-radius:10px;cursor:pointer;transition:.18s ease;
+}
+.btn:hover{border-color:var(--accent);}
+.btn.active{
+  background:rgba(var(--accent-rgb),0.16);border-color:var(--accent);color:var(--accent);
+  box-shadow:0 0 18px rgba(var(--accent-rgb),0.28);
+}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.control-row{margin-top:18px;}
+.control-label{
+  display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;
+}
+.control-label b{color:var(--accent);font-weight:600;}
+input[type=range]{
+  width:100%;accent-color:var(--accent);height:4px;cursor:pointer;background:transparent;
+}
+
+.toggle-row{display:flex;align-items:center;gap:12px;margin-top:18px;}
+.toggle{position:relative;width:46px;height:26px;flex:0 0 auto;}
+.toggle input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2;}
+.toggle-track{position:absolute;inset:0;background:var(--panel-2);border:1px solid var(--border);border-radius:16px;transition:.2s;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:var(--text-dim);border-radius:50%;transition:.2s;}
+.toggle input:checked ~ .toggle-track{background:rgba(111,207,151,0.18);border-color:var(--green);}
+.toggle input:checked ~ .toggle-track ~ .toggle-thumb{transform:translateX(20px);background:var(--green);box-shadow:0 0 10px rgba(111,207,151,0.7);}
+.toggle-text{font-size:13.5px;color:var(--text-dim);}
+
+.readout{display:flex;align-items:center;gap:14px;margin-top:20px;padding-top:18px;border-top:1px dashed var(--border);}
+.bulb{width:32px;height:32px;border-radius:50%;background:#1c2740;border:2px solid var(--border);flex:0 0 auto;transition:background .35s ease, box-shadow .35s ease;}
+.readout-text{font-size:13.5px;color:var(--text-dim);}
+.readout-text b{color:var(--text);font-weight:600;}
+.meter{font-family:'IBM Plex Mono',monospace;font-size:22px;color:var(--lightblue);margin-left:auto;}
+.meter span{font-size:12px;color:var(--text-faint);margin-left:4px;}
+
+.legend-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);}
+.legend-chip{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);}
+.legend-chip i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 auto;}
+.legend-chip i.pair-swatch{width:17px;height:9px;border-radius:6px;background:linear-gradient(90deg, rgba(79,209,197,0.45), rgba(201,166,245,0.45));}
+.sim-note{font-size:11px;color:var(--text-faint);margin-top:12px;line-height:1.5;}
+.toggle-row + .sim-note, .btn-row + .sim-note{margin-top:14px;}
+
+.info-card{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:16px;padding:24px;
+  display:flex;flex-direction:column;gap:16px;height:100%;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.05em;
+  color:var(--text-dim);background:var(--panel-1);border:1px solid var(--border);
+  padding:6px 12px;border-radius:20px;
+}
+.badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.info-card h3{font-size:21px;color:var(--text);}
+.info-card p{font-size:14.5px;color:var(--text-dim);line-height:1.65;}
+.example-box, .limitation-box{
+  border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6;border-left:3px solid;
+}
+.example-box{background:rgba(var(--accent-rgb),0.08);border-color:var(--accent);color:var(--text-dim);}
+.example-box b, .limitation-box b{color:var(--text);font-weight:600;}
+.limitation-box{background:rgba(var(--rose-rgb),0.08);border-color:var(--rose);color:var(--text-dim);}
+
+/* small graph / gauge */
+.mini-graph{width:100%;height:120px;display:block;border-radius:10px;background:#0E1729;border:1px solid var(--border);margin-top:14px;}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;flex:0 0 200px;}
+.gauge-svg{width:190px;height:auto;}
+#gauge-needle-t4{transform-origin:100px 110px;transition:transform .7s cubic-bezier(.4,0,.2,1);}
+.t4-flex{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.t4-flex .viz-canvas{flex:1 1 260px;height:280px;}
+
+/* ============ COMPARISON TABLE ============ */
+.section{padding:64px 0;border-top:1px solid var(--border);}
+.section-head{max-width:60ch;margin-bottom:36px;}
+.section-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;}
+.section-title{font-size:clamp(24px,3vw,32px);}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:16px;background:var(--panel-1);}
+table.cmp{width:100%;border-collapse:collapse;min-width:760px;}
+table.cmp th{
+  text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--text-faint);padding:16px 18px;border-bottom:1px solid var(--border);background:var(--panel-2);
+}
+table.cmp td{padding:16px 18px;border-bottom:1px solid var(--border);font-size:14px;color:var(--text-dim);vertical-align:top;}
+table.cmp tr:last-child td{border-bottom:none;}
+table.cmp td.topic-cell{color:var(--text);font-weight:500;position:relative;padding-left:26px;}
+table.cmp td.topic-cell::before{content:'';position:absolute;left:18px;top:20px;width:6px;height:6px;border-radius:50%;background:var(--row-accent);}
+table.cmp td.ref-cell{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text-faint);white-space:nowrap;}
+
+/* ============ QUIZ ============ */
+.quiz-card{background:var(--panel-1);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:720px;}
+.quiz-progress{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.quiz-progressbar{height:4px;background:var(--panel-2);border-radius:4px;overflow:hidden;margin-bottom:26px;}
+.quiz-progressbar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--lightblue));border-radius:4px;transition:width .3s ease;}
+.quiz-question{font-family:'Fraunces',serif;font-size:20px;font-weight:500;margin-bottom:22px;line-height:1.4;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;}
+.quiz-option{
+  text-align:left;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  padding:13px 16px;border-radius:10px;cursor:pointer;font-size:14.5px;transition:.15s ease;
+}
+.quiz-option:hover:not(:disabled){border-color:var(--lightblue);}
+.quiz-option.correct{border-color:var(--green);background:rgba(111,207,151,0.14);color:var(--green);}
+.quiz-option.incorrect{border-color:var(--rose);background:rgba(240,112,138,0.14);color:var(--rose);}
+.quiz-option:disabled{cursor:default;}
+.quiz-feedback{margin-top:18px;font-size:14px;line-height:1.6;color:var(--text-dim);min-height:20px;}
+.quiz-feedback.feedback-correct{color:var(--green);}
+.quiz-feedback.feedback-incorrect{color:var(--rose);}
+.quiz-feedback b{color:inherit;}
+#quiz-next-btn{
+  margin-top:22px;display:none;background:var(--teal);color:#0B1220;border:none;
+  padding:11px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
+}
+#quiz-result{display:none;text-align:center;padding:20px 0;}
+#quiz-result h3{font-size:28px;margin-bottom:10px;}
+#quiz-result p{color:var(--text-dim);font-size:15px;max-width:44ch;margin:0 auto;}
+.quiz-score-num{font-family:'IBM Plex Mono',monospace;color:var(--teal);}
+#quiz-restart-btn{
+  margin-top:24px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  padding:11px 22px;border-radius:10px;font-size:14px;cursor:pointer;
+}
+#quiz-restart-btn:hover{border-color:var(--teal);}
+
+/* ============ CHAPTER 2 ============ */
+.chap2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:44px;}
+.case-card{
+  background:var(--panel-1);border:1px solid var(--border);border-radius:16px;padding:22px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.case-stat{font-family:'IBM Plex Mono',monospace;font-size:26px;color:var(--case-accent);}
+.case-stat span{font-size:12px;color:var(--text-faint);display:block;margin-top:2px;}
+.case-card h4{font-size:16.5px;font-weight:600;font-family:'IBM Plex Sans';color:var(--text);}
+.case-card p{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+
+.data-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:16px;background:var(--panel-1);}
+table.data{width:100%;border-collapse:collapse;min-width:600px;}
+table.data th{
+  text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--text-faint);padding:14px 18px;border-bottom:1px solid var(--border);background:var(--panel-2);
+}
+table.data td{padding:13px 18px;border-bottom:1px solid var(--border);font-size:13.5px;color:var(--text-dim);}
+table.data tr:last-child td{border-bottom:none;}
+table.data td.val{font-family:'IBM Plex Mono',monospace;color:var(--lightblue);white-space:nowrap;}
+.data-note{font-size:12.5px;color:var(--text-faint);margin-top:14px;line-height:1.6;}
+
+/* ============ FOOTER ============ */
+footer{padding:40px 0 60px;border-top:1px solid var(--border);}
+footer p{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--text-faint);letter-spacing:.03em;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Laboratório de eletroquímica · ensino médio</div>
+    <h1 class="hero-title">Íons em movimento: a física por trás da <em>condutividade</em></h1>
+    <p class="hero-sub">Uma exploração visual de como sais, ácidos e açúcares se comportam — molécula por molécula — quando mergulhados em água, e por que só alguns deles fazem uma lâmpada acender.</p>
+    <p class="hero-formula">κ = (1/R) · (ℓ/A) — a condutividade de uma solução depende do número, da carga e da mobilidade dos íons livres nela presentes</p>
+    <nav class="chapter-nav">
+      <a class="chapter-link" href="#capitulo1">Capítulo 1 — Fundamentos</a>
+      <a class="chapter-link" href="#capitulo2">Capítulo 2 — Aplicações reais</a>
+      <a class="chapter-link" href="#quiz">Quiz</a>
+    </nav>
+  </header>
+
+  <div class="tabnav-outer">
+    <div class="wrap">
+      <nav class="tabnav" role="tablist" aria-label="Tópicos" id="tabnav">
+        <button class="tab-btn" role="tab" data-tab="1" style="--accent:#4FD1C5;--accent-rgb:79,209,197" aria-selected="true"><span class="tab-code">DIS-01</span><span class="tab-name">Soluções eletrolíticas e não eletrolíticas</span></button>
+        <button class="tab-btn" role="tab" data-tab="2" style="--accent:#F2A65A;--accent-rgb:242,166,90" aria-selected="false"><span class="tab-code">CON-02</span><span class="tab-name">Concentração e quantidade de íons</span></button>
+        <button class="tab-btn" role="tab" data-tab="3" style="--accent:#C9A6F5;--accent-rgb:201,166,245" aria-selected="false"><span class="tab-code">MIG-03</span><span class="tab-name">Movimento dos íons</span></button>
+        <button class="tab-btn" role="tab" data-tab="4" style="--accent:#7DD3FC;--accent-rgb:125,211,252" aria-selected="false"><span class="tab-code">CND-04</span><span class="tab-name">Condutividade elétrica</span></button>
+        <button class="tab-btn" role="tab" data-tab="5" style="--accent:#FBE38A;--accent-rgb:251,227,138" aria-selected="false"><span class="tab-code">DIL-05</span><span class="tab-name">Diluição</span></button>
+        <button class="tab-btn" role="tab" data-tab="6" style="--accent:#FF9E7A;--accent-rgb:255,158,122" aria-selected="false"><span class="tab-code">CMP-06</span><span class="tab-name">Comparação entre soluções</span></button>
+      </nav>
+    </div>
+  </div>
+
+  <main id="capitulo1">
+
+    <!-- ===================== TAB 1 ===================== -->
+    <section class="tab-panel active" data-tab="1" id="panel-1" role="tabpanel" style="--accent:#4FD1C5;--accent-rgb:79,209,197">
+      <div class="topic-grid">
+        <div class="viz-col">
+          <div class="viz-card">
+            <canvas class="viz-canvas" id="canvas-t1"></canvas>
+            <div class="btn-row">
+              <button class="btn substance-btn active" data-substance="nacl">Cloreto de sódio (NaCl) — eletrólito forte</button>
+              <button class="btn substance-btn" data-substance="acetic">Ácido acético (vinagre) — eletrólito fraco</button>
+              <button class="btn substance-btn" data-substance="sugar">Sacarose (açúcar) — não eletrólito</button>
+            </div>
+            <div class="legend-row">
+              <span class="legend-chip"><i style="background:#4FD1C5"></i>Cátion livre</span>
+              <span class="legend-chip"><i style="background:#C9A6F5"></i>Ânion livre</span>
+              <span class="legend-chip"><i class="pair-swatch"></i>Par não dissociado</span>
+              <span class="legend-chip"><i style="background:rgba(154,167,194,0.6)"></i>Molécula neutra</span>
+            </div>
+            <div class="readout">
+              <div class="bulb" id="bulb-t1"></div>
+              <p class="readout-text" id="bulb-label-t1">Conduz bem — muitos íons livres em solução</p>
+            </div>
+            <p class="sim-note">Clique em uma substância para vê-la entrar na água e se dissociar (ou não) em tempo real. Velocidades e contagens são representações didáticas do fenômeno.</p>
+          </div>
+        </div>
+        <div class="info-col">
+          <div class="info-card">
+            <span class="badge">Svante Arrhenius · 1884</span>
+            <h3>Dissociação eletrolítica</h3>
+            <p>Eletrólitos são substâncias que, dissolvidas em água, liberam íons livres — por dissociação (compostos iônicos, como sais) ou por ionização (algumas moléculas covalentes, como ácidos). Não eletrólitos se dissolvem como moléculas inteiras, sem carga livre, e por isso não conduzem corrente. Observe: o NaCl entra na água e cada par se separa por completo; o ácido acético entra e só uma fração das moléculas se abre em íons — o restante permanece unido; o açúcar entra inteiro e nunca se separa.</p>
+            <div class="example-box"><b>Exemplo:</b> ao dissolver NaCl em água, cada par de íons Na⁺ e Cl⁻ se separa completamente; já a sacarose se dissolve como moléculas neutras intactas. Arrhenius propôs essa teoria em sua tese de doutorado, inicialmente recebida com ceticismo — anos depois, ela lhe rendeu o Prêmio Nobel de Química de 1903.</div>
+            <div class="limitation-box"><b>Limitação:</b> a divisão em "conduz / não conduz" é uma simplificação. Eletrólitos fracos, como o ácido acético, dissociam-se apenas parcialmente — existe um espectro contínuo de força eletrolítica, não apenas duas categorias.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 2 ===================== -->
+    <section class="tab-panel" data-tab="2" id="panel-2" role="tabpanel" style="--accent:#F2A65A;--accent-rgb:242,166,90">
+      <div class="topic-grid">
+        <div class="viz-col">
+          <div class="viz-card">
+            <canvas class="viz-canvas" id="canvas-t2"></canvas>
+            <div class="control-row">
+              <div class="control-label"><span>Quantidade de sal dissolvido</span><b id="slider-t2-value">0 colheres</b></div>
+              <input type="range" id="slider-t2" min="0" max="10" step="1" value="0">
+            </div>
+            <canvas class="mini-graph" id="graph-t2"></canvas>
+            <div class="readout">
+              <div class="bulb" id="bulb-t2"></div>
+              <p class="readout-text" id="bulb-label-t2">Sem soluto dissolvido — nenhum íon livre</p>
+            </div>
+            <p class="sim-note">Arraste o controle e observe as partículas surgindo ou desaparecendo do béquer — a contagem exibida acompanha o que você vê, não o contrário.</p>
+          </div>
+        </div>
+        <div class="info-col">
+          <div class="info-card">
+            <span class="badge">Friedrich Kohlrausch · 1876</span>
+            <h3>Íons livres e capacidade de condução</h3>
+            <p>Quanto mais soluto eletrolítico é dissolvido em um mesmo volume, mais íons livres ficam disponíveis para carregar corrente — mais portadores de carga significa mais corrente medida, aproximadamente de forma proporcional em concentrações baixas. Mas a concentração é só um dos fatores: a condutividade final também depende da natureza do eletrólito (forte ou fraco), da mobilidade de cada íon e da temperatura da solução.</p>
+            <div class="example-box"><b>Experimento:</b> dissolver quantidades crescentes de sal de cozinha num mesmo volume de água e observar o brilho de uma lâmpada ou a leitura de um multímetro — um teste clássico de laboratório escolar.</div>
+            <div class="limitation-box"><b>Limitação:</b> essa relação não é linear para sempre. Em concentrações muito altas, os íons se aproximam demais uns dos outros, aumentando as interações interiônicas e reduzindo a mobilidade individual — a condutividade cresce cada vez menos, um efeito descrito pela equação de Debye-Hückel-Onsager (1926).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 3 ===================== -->
+    <section class="tab-panel" data-tab="3" id="panel-3" role="tabpanel" style="--accent:#C9A6F5;--accent-rgb:201,166,245">
+      <div class="topic-grid">
+        <div class="viz-col">
+          <div class="viz-card">
+            <canvas class="viz-canvas" id="canvas-t3"></canvas>
+            <div class="toggle-row">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-t3">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+              <span class="toggle-text">Ligar campo elétrico (fechar o circuito)</span>
+            </div>
+            <div class="control-row">
+              <div class="control-label"><span>Tensão aplicada</span><b id="slider-t3-value">5</b></div>
+              <input type="range" id="slider-t3" min="1" max="10" step="1" value="5" disabled>
+            </div>
+            <p class="sim-note">Observe os rastros deixados pelas partículas: desenhos caóticos indicam agitação térmica; trilhas retas para as bordas indicam migração orientada.</p>
+          </div>
+        </div>
+        <div class="info-col">
+          <div class="info-card">
+            <span class="badge">Friedrich Kohlrausch · 1876</span>
+            <h3>Migração iônica sob campo elétrico</h3>
+            <p>Sem um campo elétrico externo, os íons em solução se movem de forma aleatória (agitação térmica) — repare no rastro desordenado. Ao ligar o campo, cátions passam a migrar em linha para o cátodo (eletrodo negativo) e ânions para o ânodo (eletrodo positivo) — os rastros viram trilhas retas. Esse fluxo direcionado de íons é a própria corrente elétrica dentro da solução.</p>
+            <div class="example-box"><b>Experimento histórico:</b> no clássico ensaio de migração iônica em gel, sais coloridos como permanganato de potássio e sulfato de cobre são dissolvidos entre dois eletrodos ligados a uma fonte DC — as cores visivelmente se deslocam para eletrodos opostos ao longo de minutos, tornando a migração iônica visível a olho nu.</div>
+            <div class="limitation-box"><b>Limitação:</b> nem todos os íons se movem na mesma velocidade. A mobilidade depende do tamanho, da carga e do envoltório de hidratação do íon — H⁺ e OH⁻, por exemplo, se movem de forma anomalamente rápida por um mecanismo de "salto de prótons" (mecanismo de Grotthuss), bem diferente do deslocamento físico comum a outros íons.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 4 ===================== -->
+    <section class="tab-panel" data-tab="4" id="panel-4" role="tabpanel" style="--accent:#7DD3FC;--accent-rgb:125,211,252">
+      <div class="topic-grid">
+        <div class="viz-col">
+          <div class="viz-card">
+            <div class="t4-flex">
+              <canvas class="viz-canvas" id="canvas-t4"></canvas>
+              <div class="gauge-wrap">
+                <svg viewBox="0 0 200 120" class="gauge-svg">
+                  <path d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="#28375C" stroke-width="14" stroke-linecap="round"/>
+                  <path id="gauge-fill-t4" d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="#7DD3FC" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.4" stroke-dashoffset="251.4"/>
+                  <line id="gauge-needle-t4" x1="100" y1="110" x2="100" y2="38" stroke="#E8ECF6" stroke-width="3" stroke-linecap="round" style="transform:rotate(-90deg)"/>
+                  <circle cx="100" cy="110" r="6" fill="#E8ECF6"/>
+                </svg>
+                <div class="meter" id="reading-t4">0 <span>µS/cm</span></div>
+              </div>
+            </div>
+            <div class="toggle-row">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-t4">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+              <span class="toggle-text">Ligar fonte (fechar o circuito)</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn liquid-btn active" data-liquid="destilada">Água destilada</button>
+              <button class="btn liquid-btn" data-liquid="torneira">Água da torneira</button>
+              <button class="btn liquid-btn" data-liquid="mar">Água do mar</button>
+              <button class="btn liquid-btn" data-liquid="salina">Solução salina forte</button>
+            </div>
+            <div class="readout">
+              <div class="bulb" id="bulb-t4"></div>
+              <p class="readout-text" id="bulb-label-t4">Fonte desligada — nenhuma corrente circula</p>
+            </div>
+            <p class="sim-note">Ligue a fonte e veja a sequência completa: os íons passam a migrar, a corrente aparece no fio e só então o medidor e a lâmpada reagem.</p>
+          </div>
+        </div>
+        <div class="info-col">
+          <div class="info-card">
+            <span class="badge">Faraday &amp; Whewell · 1834</span>
+            <h3>O que é condutividade elétrica</h3>
+            <p>Condutividade elétrica (κ) mede a capacidade de uma solução conduzir corrente, resultado direto da presença e da mobilidade de íons livres nela. É medida na prática com um condutivímetro — dois eletrodos e uma tensão alternada, para evitar eletrólise — com leitura em µS/cm ou mS/cm. São quatro grandezas relacionadas, mas diferentes: a <b>tensão</b> impulsiona os íons; a <b>corrente</b> é o fluxo de carga resultante; a <b>concentração</b> é a quantidade de soluto por volume; e a <b>condutividade</b> resume a facilidade com que a solução deixa essa corrente passar.</p>
+            <div class="example-box"><b>Exemplo:</b> água destilada tem condutividade extremamente baixa (traços de H⁺/OH⁻ da autoionização); água da torneira sobe bastante por causa de minerais dissolvidos; água do mar chega a dezenas de milhares de µS/cm. Faraday e o linguista William Whewell cunharam, em 1834, os termos "eletrólito", "íon", "ânodo" e "cátodo" ainda usados hoje.</div>
+            <div class="limitation-box"><b>Limitação:</b> a condutividade medida é fortemente dependente da temperatura — a mobilidade iônica aumenta com o calor. Por isso comparações justas exigem correção ou padronização de temperatura, normalmente a 25 °C.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 5 ===================== -->
+    <section class="tab-panel" data-tab="5" id="panel-5" role="tabpanel" style="--accent:#FBE38A;--accent-rgb:251,227,138">
+      <div class="topic-grid">
+        <div class="viz-col">
+          <div class="viz-card">
+            <canvas class="viz-canvas" id="canvas-t5"></canvas>
+            <div class="btn-row">
+              <button class="btn" id="dilute-btn-t5">Diluir (adicionar água)</button>
+              <button class="btn" id="reset-btn-t5">Reiniciar experimento</button>
+            </div>
+            <div class="control-row">
+              <div class="control-label"><span id="step-t5">Passo 0 de 6</span></div>
+              <p class="readout-text" id="formula-t5" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;">C₀ = 1,00 mol/L (concentração de referência)</p>
+            </div>
+            <div class="readout">
+              <div class="bulb" id="bulb-t5"></div>
+              <p class="readout-text" id="bulb-label-t5">Solução concentrada — boa condução</p>
+            </div>
+            <p class="sim-note">A cada clique, metade da solução sai e água entra até completar o volume de novo — repare no nível subindo, na cor clareando e nos íons se espalhando.</p>
+          </div>
+        </div>
+        <div class="info-col">
+          <div class="info-card">
+            <span class="badge">Wilhelm Ostwald · lei da diluição, 1888</span>
+            <h3>Diluição e concentração de íons</h3>
+            <p>Diluir uma solução — adicionar solvente sem adicionar mais soluto — mantém constante a quantidade de mols de soluto, mas aumenta o volume. A concentração de íons por litro cai proporcionalmente, segundo C₁·V₁ = C₂·V₂. Com menos íons por volume, a condutividade de um eletrólito forte tende a diminuir a cada diluição.</p>
+            <div class="example-box"><b>Experimento:</b> igual ao ensaio de diluição em série feito em sala — retira-se metade da solução e completa-se com água até o volume original, repetindo o processo. Antes de observar o resultado, os alunos calculam a nova concentração com C₁V₁ = C₂V₂.</div>
+            <div class="limitation-box"><b>Limitação:</b> para eletrólitos fracos, a diluição aumenta o grau de ionização (α), segundo a lei de Ostwald — a condutividade molar chega a subir mesmo com menos íons por litro, contrariando a intuição simples de "mais água, menos condução".</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 6 ===================== -->
+    <section class="tab-panel" data-tab="6" id="panel-6" role="tabpanel" style="--accent:#FF9E7A;--accent-rgb:255,158,122">
+      <div class="topic-grid">
+        <div class="viz-col">
+          <div class="viz-card">
+            <canvas class="viz-canvas" id="canvas-t6" style="height:400px;"></canvas>
+            <div class="btn-row">
+              <button class="btn" id="sort-btn-t6">Ordenar: menor → maior condutividade</button>
+            </div>
+            <p class="sim-note">Cada pequena lâmpada acende de acordo com a condutividade daquela solução — e quanto mais forte o brilho, mais rápido os íons se agitam no béquer correspondente.</p>
+          </div>
+        </div>
+        <div class="info-col">
+          <div class="info-card">
+            <span class="badge">Portaria GM/MS nº 888/2021</span>
+            <h3>Do isolante ao condutor</h3>
+            <p>A condutividade de uma solução depende de quatro fatores combinados: se o soluto é eletrólito ou não, a concentração, o grau de dissociação (forte ou fraco) e a mobilidade/carga dos íons. Isso cria um espectro que vai de quase-isolantes até bons condutores.</p>
+            <div class="example-box"><b>Exemplo:</b> lado a lado, água destilada, solução de açúcar, água da torneira, vinagre diluído, água do mar e solução saturada de NaCl formam uma escala visual de vários milhares de vezes entre o menor e o maior valor de condutividade.</div>
+            <div class="limitation-box"><b>Limitação:</b> comparar apenas o valor bruto de condutividade (κ) pode enganar, pois ele depende da temperatura e da geometria dos eletrodos usados na medição. Para comparações realmente justas entre substâncias, químicos usam a condutividade molar (Λm), normalizada pela concentração.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== COMPARISON TABLE ===================== -->
+  <section class="section" id="tabela">
+    <div class="section-head">
+      <div class="section-eyebrow">Visão geral</div>
+      <h2 class="section-title">Os seis tópicos, lado a lado</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="cmp">
+        <thead>
+          <tr><th>Tópico</th><th>Conceito-chave</th><th>Fenômeno visual</th><th>Referência</th></tr>
+        </thead>
+        <tbody>
+          <tr style="--row-accent:#4FD1C5">
+            <td class="topic-cell">Soluções eletrolíticas e não eletrolíticas</td>
+            <td>Dissociação ou ionização libera íons livres em solução</td>
+            <td>Molécula se separa em cargas opostas ou permanece intacta</td>
+            <td class="ref-cell">Arrhenius, 1884</td>
+          </tr>
+          <tr style="--row-accent:#F2A65A">
+            <td class="topic-cell">Concentração e quantidade de íons</td>
+            <td>Mais soluto dissolvido = mais portadores de carga</td>
+            <td>Número de partículas no béquer cresce com a concentração</td>
+            <td class="ref-cell">Kohlrausch, 1876</td>
+          </tr>
+          <tr style="--row-accent:#C9A6F5">
+            <td class="topic-cell">Movimento dos íons</td>
+            <td>O campo elétrico orienta a migração dos íons</td>
+            <td>Cátions e ânions se deslocam para eletrodos opostos</td>
+            <td class="ref-cell">Kohlrausch, 1876</td>
+          </tr>
+          <tr style="--row-accent:#7DD3FC">
+            <td class="topic-cell">Condutividade elétrica</td>
+            <td>κ mede a capacidade da solução de conduzir corrente</td>
+            <td>Lâmpada e medidor reagem à presença de íons livres</td>
+            <td class="ref-cell">Faraday &amp; Whewell, 1834</td>
+          </tr>
+          <tr style="--row-accent:#FBE38A">
+            <td class="topic-cell">Diluição</td>
+            <td>C₁V₁ = C₂V₂ — a concentração cai com o aumento de volume</td>
+            <td>Cor e brilho da lâmpada diminuem a cada diluição</td>
+            <td class="ref-cell">Ostwald, 1888</td>
+          </tr>
+          <tr style="--row-accent:#FF9E7A">
+            <td class="topic-cell">Comparação entre soluções</td>
+            <td>A condutividade varia com tipo, concentração e força do eletrólito</td>
+            <td>Béqueres lado a lado, do isolante ao condutor</td>
+            <td class="ref-cell">Portaria GM/MS 888/2021</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== QUIZ ===================== -->
+  <section class="section" id="quiz">
+    <div class="section-head">
+      <div class="section-eyebrow">Verifique o que aprendeu</div>
+      <h2 class="section-title">Quiz — condutividade em solução</h2>
+    </div>
+    <div class="quiz-card">
+      <div id="quiz-active">
+        <div class="quiz-progress" id="quiz-progress">Pergunta 1 de 8</div>
+        <div class="quiz-progressbar"><div class="quiz-progressbar-fill" id="quiz-progressbar-fill" style="width:12.5%"></div></div>
+        <div class="quiz-question" id="quiz-question"></div>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+        <button id="quiz-next-btn">Próxima pergunta</button>
+      </div>
+      <div id="quiz-result">
+        <h3>Resultado</h3>
+        <p>Você acertou <span class="quiz-score-num" id="quiz-score-num">0</span> de <span id="quiz-score-total">8</span> perguntas.</p>
+        <p id="quiz-result-msg" style="margin-top:10px;"></p>
+        <button id="quiz-restart-btn">Refazer o quiz</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CHAPTER 2 ===================== -->
+  <section class="section" id="capitulo2">
+    <div class="section-head">
+      <div class="section-eyebrow">Capítulo 2</div>
+      <h2 class="section-title">Condutividade no mundo real</h2>
+      <p style="color:var(--text-dim);font-size:14.5px;margin-top:14px;">A mesma física que faz uma lâmpada acender num béquer de sala de aula está por trás de decisões em saúde, agricultura, energia e saneamento.</p>
+    </div>
+
+    <div class="chap2-grid">
+      <div class="case-card" style="--case-accent:#7DD3FC">
+        <div class="case-stat">µS/cm<span>indicador de qualidade da água</span></div>
+        <h4>Água potável e saúde pública</h4>
+        <p>Estações de tratamento usam a condutividade como indicador operacional rápido da quantidade de sólidos dissolvidos na água — um salto repentino no valor costuma indicar contaminação, mesmo antes de análises químicas completas.</p>
+      </div>
+      <div class="case-card" style="--case-accent:#F0708A">
+        <div class="case-stat">Na⁺ K⁺ Cl⁻<span>eletrólitos no corpo humano</span></div>
+        <h4>Eletrólitos e o corpo humano</h4>
+        <p>Impulsos nervosos e contrações musculares dependem do fluxo de íons de sódio, potássio e cloreto através de membranas celulares. O soro fisiológico e a solução de Ringer, desenvolvida por Sydney Ringer na década de 1880, repõem esse equilíbrio iônico.</p>
+      </div>
+      <div class="case-card" style="--case-accent:#F2A65A">
+        <div class="case-stat">Li⁺<span>eletrólito em baterias</span></div>
+        <h4>Baterias e pilhas</h4>
+        <p>Em baterias de íon-lítio, o eletrólito é o meio que permite aos íons de lítio migrarem entre os eletrodos durante a carga e a descarga — a condutividade desse eletrólito limita diretamente a potência que a bateria consegue entregar.</p>
+      </div>
+      <div class="case-card" style="--case-accent:#6FCF97">
+        <div class="case-stat">CE<span>condutividade elétrica do solo</span></div>
+        <h4>Agricultura de precisão</h4>
+        <p>Sensores de condutividade elétrica do solo estimam a salinidade e ajudam produtores a decidir onde irrigar e quais culturas plantar — solos muito salinos dificultam a absorção de água pelas raízes.</p>
+      </div>
+      <div class="case-card" style="--case-accent:#C9A6F5">
+        <div class="case-stat">24h<span>monitoramento contínuo</span></div>
+        <h4>Estações de tratamento de esgoto</h4>
+        <p>Sensores de condutividade instalados em redes de esgoto e efluentes industriais monitoram continuamente a água, sinalizando vazamentos ou despejos irregulares em tempo real, antes que cheguem a um curso d'água.</p>
+      </div>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data">
+        <thead><tr><th>Líquido</th><th>Condutividade típica</th><th>Observação</th></tr></thead>
+        <tbody>
+          <tr><td>Água ultrapura (teórica)</td><td class="val">≈ 0,055 µS/cm</td><td>Mínimo teórico, só autoionização da água</td></tr>
+          <tr><td>Água destilada</td><td class="val">≈ 0,5 – 2 µS/cm</td><td>Traços de CO₂ e íons residuais</td></tr>
+          <tr><td>Água da chuva</td><td class="val">≈ 5 – 30 µS/cm</td><td>Varia com poluição atmosférica local</td></tr>
+          <tr><td>Água potável de rede</td><td class="val">≈ 50 – 800 µS/cm</td><td>Depende da fonte e do tratamento</td></tr>
+          <tr><td>Soro fisiológico (NaCl 0,9%)</td><td class="val">≈ 15.000 µS/cm</td><td>Isotônico com o plasma sanguíneo</td></tr>
+          <tr><td>Água do mar</td><td class="val">≈ 50.000 µS/cm</td><td>Rica em Na⁺, Cl⁻, Mg²⁺ e outros íons</td></tr>
+          <tr><td>Solução saturada de NaCl</td><td class="val">≈ 210.000 µS/cm</td><td>Próximo do limite prático de solubilidade</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="data-note">Valores aproximados, típicos e medidos a 25 °C — servem para comparação relativa entre substâncias, não como referência analítica de laboratório.</p>
+  </section>
+
+  <footer>
+    <p>Recurso educacional — Química, Ensino Médio · conteúdo baseado em princípios estabelecidos de eletroquímica</p>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function rand(min,max){return min+Math.random()*(max-min);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function lerp(a,b,t){return a+(b-a)*t;}
+function fmtInt(n){return Math.round(n).toLocaleString('pt-BR');}
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function fitCanvas(canvas){
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = Math.max(rect.width, 10), h = Math.max(rect.height, 10);
+  canvas.width = Math.round(w*dpr);
+  canvas.height = Math.round(h*dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w, h};
+}
+
+function drawBeaker(ctx,x,y,w,h,fill){
+  const botW = w*0.86, slant=(w-botW)/2;
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(x+w,y);
+  ctx.lineTo(x+w-slant,y+h);
+  ctx.lineTo(x+slant,y+h);
+  ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  ctx.strokeStyle='rgba(232,236,246,0.30)';
+  ctx.lineWidth=1.5;
+  ctx.stroke();
+  return {xmin:x+slant+14, xmax:x+w-slant-14, ymin:y+16, ymax:y+h-14};
+}
+
+function drawIon(ctx,p,alpha){
+  alpha = alpha===undefined?1:alpha;
+  ctx.globalAlpha = alpha;
+  if(p.type==='pair'){
+    const ang = p.pairAngle||0.7, d=p.r*0.95;
+    const x1=p.x-Math.cos(ang)*d, y1=p.y-Math.sin(ang)*d;
+    const x2=p.x+Math.cos(ang)*d, y2=p.y+Math.sin(ang)*d;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.strokeStyle='rgba(154,167,194,0.5)'; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x1,y1,p.r*0.62,0,Math.PI*2);
+    ctx.fillStyle='rgba(79,209,197,0.38)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x2,y2,p.r*0.62,0,Math.PI*2);
+    ctx.fillStyle='rgba(201,166,245,0.38)'; ctx.fill();
+    ctx.globalAlpha=1;
+    return;
+  }
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+  if(p.type==='cation'){
+    ctx.fillStyle='rgba(79,209,197,0.85)';
+    ctx.shadowColor='rgba(79,209,197,0.6)'; ctx.shadowBlur=8;
+  } else if(p.type==='anion'){
+    ctx.fillStyle='rgba(201,166,245,0.85)';
+    ctx.shadowColor='rgba(201,166,245,0.6)'; ctx.shadowBlur=8;
+  } else {
+    ctx.fillStyle='rgba(154,167,194,0.55)';
+    ctx.shadowBlur=0;
+  }
+  ctx.fill();
+  ctx.shadowBlur=0;
+  if(p.type==='cation'||p.type==='anion'){
+    ctx.fillStyle='#0B1220';
+    ctx.font='bold '+(p.r*1.05)+'px IBM Plex Mono';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(p.type==='cation'?'+':'–', p.x, p.y+0.5);
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawTrail(ctx,p,color){
+  if(!p.trail || p.trail.length<2) return;
+  for(let i=1;i<p.trail.length;i++){
+    const a = p.trail[i-1], b = p.trail[i];
+    const alpha = (i/p.trail.length)*0.35;
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+    ctx.strokeStyle = color.replace('ALPHA', alpha.toFixed(2));
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function stateTag(ctx, x, y, text, color){
+  ctx.font='700 11.5px IBM Plex Mono';
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillStyle=color;
+  ctx.fillText(text.toUpperCase(), x, y);
+}
+
+function setBulb(el, intensity){
+  intensity = clamp(intensity,0,1);
+  if(intensity<=0.02){
+    el.style.background='#1c2740';
+    el.style.boxShadow='none';
+    el.style.borderColor='var(--border)';
+  } else {
+    const alpha = 0.25+intensity*0.55;
+    el.style.background='radial-gradient(circle, #eafff3, rgba(111,207,151,'+(0.5+intensity*0.5)+'))';
+    el.style.boxShadow='0 0 '+(8+intensity*26)+'px '+(2+intensity*6)+'px rgba(111,207,151,'+alpha+')';
+    el.style.borderColor='var(--green)';
+  }
+}
+
+/* ============================================================
+   TAB NAVIGATION
+   ============================================================ */
+const initialized = {};
+const fitters = {};
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
+let activeTab = 1;
+
+function switchTab(n){
+  activeTab = n;
+  tabButtons.forEach(b=>b.setAttribute('aria-selected', String(Number(b.dataset.tab)===n)));
+  tabPanels.forEach(p=>p.classList.toggle('active', Number(p.dataset.tab)===n));
+  if(fitters[n]) fitters[n]();
+  if(!initialized[n] && inits[n]){ inits[n](); initialized[n]=true; }
+}
+
+tabButtons.forEach(b=>{
+  b.addEventListener('click', ()=>switchTab(Number(b.dataset.tab)));
+  b.addEventListener('keydown', (e)=>{
+    const idx = Array.from(tabButtons).indexOf(b);
+    if(e.key==='ArrowRight'){ tabButtons[(idx+1)%tabButtons.length].focus(); }
+    if(e.key==='ArrowLeft'){ tabButtons[(idx-1+tabButtons.length)%tabButtons.length].focus(); }
+  });
+});
+
+window.addEventListener('resize', ()=>{ if(fitters[activeTab]) fitters[activeTab](); });
+
+/* ============================================================
+   TAB 1 — soluções eletrolíticas e não eletrolíticas
+   ============================================================ */
+const t1 = {canvas:document.getElementById('canvas-t1'), ctx:null, w:0, h:0, particles:[], substance:'nacl', phase:'steady', animStart:0, animDur:850};
+const bulb1 = document.getElementById('bulb-t1'), bulbLabel1 = document.getElementById('bulb-label-t1');
+const T1_INFO = {
+  nacl:   {label:'NaCl (s) entrando na água', state:'Eletrólito forte', color:'#6FCF97'},
+  acetic: {label:'CH₃COOH entrando na água', state:'Eletrólito fraco', color:'#F2A65A'},
+  sugar:  {label:'C₁₂H₂₂O₁₁ entrando na água', state:'Não eletrólito', color:'#9AA7C2'}
+};
+
+function t1Fit(){ const r=fitCanvas(t1.canvas); t1.ctx=r.ctx; t1.w=r.w; t1.h=r.h; }
+fitters[1]=t1Fit;
+
+function t1SetSubstance(sub){
+  t1.substance = sub;
+  document.querySelectorAll('#panel-1 .substance-btn').forEach(b=>b.classList.toggle('active', b.dataset.substance===sub));
+  const cx = t1.w*0.5, cy = t1.h*0.14;
+  const slots = 9;
+  const newParticles = [];
+  for(let i=0;i<slots;i++){
+    const tx = rand(t1.w*0.16, t1.w*0.80), ty = rand(t1.h*0.34, t1.h*0.86);
+    const sx = cx+rand(-10,10), sy = cy+rand(-6,6);
+    if(sub==='sugar'){
+      newParticles.push({sx,sy,tx,ty,x:sx,y:sy,r:7,type:'neutral'});
+    } else if(sub==='nacl'){
+      newParticles.push({sx,sy,tx,ty,x:sx,y:sy,r:6.5,type:'cation'});
+      newParticles.push({sx,sy,tx:tx+rand(16,28),ty,x:sx,y:sy,r:6.5,type:'anion'});
+    } else {
+      if(i<3){
+        newParticles.push({sx,sy,tx,ty,x:sx,y:sy,r:6.5,type:'cation'});
+        newParticles.push({sx,sy,tx:tx+rand(16,28),ty,x:sx,y:sy,r:6.5,type:'anion'});
+      } else {
+        newParticles.push({sx,sy,tx,ty,x:sx,y:sy,r:8,type:'pair',pairAngle:rand(0,Math.PI*2)});
+      }
+    }
+  }
+  t1.particles = newParticles;
+  t1.phase = 'dissolving';
+  t1.animStart = performance.now();
+
+  if(sub==='nacl'){ setBulb(bulb1,1); bulbLabel1.textContent='Conduz bem — todos os pares se separaram em Na⁺ e Cl⁻ livres'; }
+  else if(sub==='sugar'){ setBulb(bulb1,0); bulbLabel1.textContent='Não conduz — as moléculas se dissolveram inteiras, sem formar íons'; }
+  else { setBulb(bulb1,0.32); bulbLabel1.textContent='Conduz fracamente — só uma fração das moléculas se ionizou, o resto segue unido'; }
+}
+
+function t1Update(){
+  if(t1.phase==='dissolving'){
+    const t = clamp((performance.now()-t1.animStart)/t1.animDur, 0, 1);
+    const e = 1-Math.pow(1-t,3);
+    t1.particles.forEach(p=>{ p.x=lerp(p.sx,p.tx,e); p.y=lerp(p.sy,p.ty,e); });
+    if(t>=1){
+      t1.phase='steady';
+      t1.particles.forEach(p=>{ p.vx=rand(-0.15,0.15); p.vy=rand(-0.15,0.15); });
+    }
+    return;
+  }
+  if(reducedMotion) return;
+  const bounds = {xmin:t1.w*0.10, xmax:t1.w*0.90, ymin:t1.h*0.30, ymax:t1.h*0.90};
+  t1.particles.forEach(p=>{
+    p.vx += rand(-0.05,0.05); p.vy += rand(-0.05,0.05);
+    p.vx*=0.97; p.vy*=0.97;
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<bounds.xmin){p.x=bounds.xmin;p.vx*=-0.7;}
+    if(p.x>bounds.xmax){p.x=bounds.xmax;p.vx*=-0.7;}
+    if(p.y<bounds.ymin){p.y=bounds.ymin;p.vy*=-0.7;}
+    if(p.y>bounds.ymax){p.y=bounds.ymax;p.vy*=-0.7;}
+  });
+}
+function t1Draw(){
+  const ctx=t1.ctx; if(!ctx) return;
+  ctx.clearRect(0,0,t1.w,t1.h);
+  drawBeaker(ctx, t1.w*0.06, t1.h*0.08, t1.w*0.88, t1.h*0.84, 'rgba(79,209,197,0.05)');
+  const wy = t1.h*0.28;
+  ctx.beginPath(); ctx.setLineDash([4,4]);
+  ctx.moveTo(t1.w*0.10, wy); ctx.lineTo(t1.w*0.90, wy);
+  ctx.strokeStyle='rgba(232,236,246,0.18)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.setLineDash([]);
+  const info = T1_INFO[t1.substance];
+  if(t1.phase==='dissolving'){
+    const t = clamp((performance.now()-t1.animStart)/t1.animDur,0,1);
+    ctx.globalAlpha = clamp(1-t*1.4,0,1);
+    ctx.fillStyle='rgba(232,236,246,0.75)';
+    ctx.font='600 10.5px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText(info.label, t1.w*0.5, t1.h*0.09);
+    ctx.globalAlpha=1;
+  }
+  t1.particles.forEach(p=>drawIon(ctx,p));
+  stateTag(ctx, t1.w*0.05, t1.h*0.04, info.state, info.color);
+}
+document.querySelectorAll('#panel-1 .substance-btn').forEach(b=>{
+  b.addEventListener('click', ()=>t1SetSubstance(b.dataset.substance));
+});
+function t1Init(){ t1Fit(); t1SetSubstance('nacl'); }
+
+/* ============================================================
+   TAB 2 — concentração e quantidade de íons
+   ============================================================ */
+const t2 = {canvas:document.getElementById('canvas-t2'), ctx:null, w:0, h:0, particles:[], level:0};
+const graph2 = {canvas:document.getElementById('graph-t2'), ctx:null, w:0, h:0};
+const bulb2 = document.getElementById('bulb-t2'), bulbLabel2 = document.getElementById('bulb-label-t2');
+const slider2 = document.getElementById('slider-t2'), slider2val = document.getElementById('slider-t2-value');
+
+function t2Fit(){
+  let r=fitCanvas(t2.canvas); t2.ctx=r.ctx; t2.w=r.w; t2.h=r.h;
+  r=fitCanvas(graph2.canvas); graph2.ctx=r.ctx; graph2.w=r.w; graph2.h=r.h;
+}
+fitters[2]=t2Fit;
+
+function t2CurrentFraction(level){
+  if(level<=7) return level/7;
+  return clamp(1-(level-7)*0.05, 0.75, 1);
+}
+
+function t2Category(level){
+  if(level===0) return {text:'Sem soluto', color:'#9AA7C2'};
+  if(level<=3) return {text:'Solução diluída', color:'#F2A65A'};
+  if(level<=6) return {text:'Solução moderada', color:'#F2A65A'};
+  return {text:'Solução concentrada', color:'#6FCF97'};
+}
+function t2SetLevel(level){
+  t2.level = level;
+  slider2val.textContent = level+(level===1?' colher':' colheres');
+  const desired = level*3;
+  const active = t2.particles.filter(p=>!p.dying);
+  if(desired>active.length){
+    for(let i=active.length;i<desired;i++){
+      t2.particles.push({
+        x:rand(t2.w*0.15,t2.w*0.85), y:rand(t2.h*0.15,t2.h*0.85),
+        vx:rand(-0.35,0.35), vy:rand(-0.2,0.2), r:5.5, life:0,
+        type: i%2===0?'cation':'anion'
+      });
+    }
+  } else if(desired<active.length){
+    let toRemove = active.length-desired;
+    for(const p of active){
+      if(toRemove<=0) break;
+      p.dying=true; toRemove--;
+    }
+  }
+  const frac = t2CurrentFraction(level);
+  setBulb(bulb2, level===0?0:frac);
+  bulbLabel2.textContent = level===0 ? 'Sem soluto dissolvido — nenhum íon livre' :
+    'Corrente relativa: '+Math.round(frac*100)+'% — '+desired+' íons livres em solução';
+}
+function t2Update(){
+  t2.particles.forEach(p=>{
+    if(p.dying){ p.life -= reducedMotion?0.2:0.07; }
+    else { p.life = Math.min(1, (p.life===undefined?1:p.life)+0.09); }
+  });
+  t2.particles = t2.particles.filter(p=>p.life===undefined || p.life>0);
+  if(reducedMotion) return;
+  t2.particles.forEach(p=>{
+    p.vx+=rand(-0.06,0.06); p.vy+=rand(-0.06,0.06);
+    p.vx*=0.97; p.vy*=0.97;
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<t2.w*0.08){p.x=t2.w*0.08;p.vx*=-0.7;}
+    if(p.x>t2.w*0.92){p.x=t2.w*0.92;p.vx*=-0.7;}
+    if(p.y<t2.h*0.08){p.y=t2.h*0.08;p.vy*=-0.7;}
+    if(p.y>t2.h*0.92){p.y=t2.h*0.92;p.vy*=-0.7;}
+  });
+}
+function t2Draw(){
+  const ctx=t2.ctx; if(!ctx) return;
+  ctx.clearRect(0,0,t2.w,t2.h);
+  drawBeaker(ctx, t2.w*0.06, t2.h*0.08, t2.w*0.88, t2.h*0.84, 'rgba(242,166,90,0.05)');
+  t2.particles.forEach(p=>drawIon(ctx,p,p.life===undefined?1:p.life));
+  const cat = t2Category(t2.level);
+  stateTag(ctx, t2.w*0.05, t2.h*0.04, cat.text, cat.color);
+  const activeCount = t2.particles.filter(p=>!p.dying).length;
+  ctx.font='500 12px IBM Plex Mono'; ctx.textAlign='right'; ctx.textBaseline='top';
+  ctx.fillStyle='rgba(232,236,246,0.6)';
+  ctx.fillText(activeCount+' íons livres', t2.w*0.95, t2.h*0.04);
+}
+function t2GraphDraw(){
+  const ctx=graph2.ctx; if(!ctx) return;
+  const w=graph2.w, h=graph2.h, pad=14;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='rgba(154,167,194,0.25)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.moveTo(pad,pad); ctx.lineTo(pad,h-pad); ctx.stroke();
+  ctx.beginPath();
+  for(let l=0;l<=10;l++){
+    const x = pad+(l/10)*(w-pad*2);
+    const y = h-pad-(t2CurrentFraction(l))*(h-pad*2);
+    if(l===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle='#F2A65A'; ctx.lineWidth=2; ctx.stroke();
+  const mx = pad+(t2.level/10)*(w-pad*2);
+  const my = h-pad-(t2CurrentFraction(t2.level))*(h-pad*2);
+  ctx.beginPath(); ctx.arc(mx,my,4.5,0,Math.PI*2);
+  ctx.fillStyle='#F2A65A'; ctx.shadowColor='#F2A65A'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(154,167,194,0.65)'; ctx.font='10.5px IBM Plex Mono';
+  ctx.fillText('corrente relativa × concentração', pad, 12);
+}
+slider2.addEventListener('input', ()=>t2SetLevel(Number(slider2.value)));
+function t2Init(){ t2Fit(); t2SetLevel(0); }
+
+/* ============================================================
+   TAB 3 — movimento dos íons
+   ============================================================ */
+const t3 = {canvas:document.getElementById('canvas-t3'), ctx:null, w:0, h:0, particles:[], fieldOn:false, voltage:5};
+const toggle3 = document.getElementById('toggle-t3'), slider3 = document.getElementById('slider-t3'), slider3val = document.getElementById('slider-t3-value');
+
+function t3Fit(){ const r=fitCanvas(t3.canvas); t3.ctx=r.ctx; t3.w=r.w; t3.h=r.h; }
+fitters[3]=t3Fit;
+
+function t3Seed(){
+  t3.particles=[];
+  const n=18;
+  for(let i=0;i<n;i++){
+    t3.particles.push({
+      x:rand(t3.w*0.2,t3.w*0.8), y:rand(t3.h*0.15,t3.h*0.85),
+      vx:rand(-0.2,0.2), vy:rand(-0.2,0.2), r:6, trail:[],
+      type: i%2===0?'cation':'anion'
+    });
+  }
+}
+function t3Update(){
+  const xmin=t3.w*0.14, xmax=t3.w*0.86, ymin=t3.h*0.1, ymax=t3.h*0.9;
+  const speed = t3.fieldOn ? (0.5+t3.voltage*0.28) : 0;
+  const trailLen = t3.fieldOn ? 10 : 5;
+  t3.particles.forEach(p=>{
+    if(!reducedMotion){
+      p.vx += rand(-0.09,0.09); p.vy += rand(-0.09,0.09);
+      if(t3.fieldOn){
+        const dir = p.type==='cation'?-1:1;
+        p.vx += dir*speed*0.03;
+      }
+      p.vx*=0.96; p.vy*=0.96;
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.y<ymin){p.y=ymin;p.vy*=-0.6;}
+      if(p.y>ymax){p.y=ymax;p.vy*=-0.6;}
+      if(t3.fieldOn){
+        if(p.type==='cation' && p.x<xmin){ p.x=xmax-rand(0,18); p.y=rand(ymin,ymax); p.trail=[]; }
+        if(p.type==='anion' && p.x>xmax){ p.x=xmin+rand(0,18); p.y=rand(ymin,ymax); p.trail=[]; }
+        if(p.type==='cation' && p.x>xmax){p.x=xmax;p.vx*=-0.4;}
+        if(p.type==='anion' && p.x<xmin){p.x=xmin;p.vx*=-0.4;}
+      } else {
+        if(p.x<xmin){p.x=xmin;p.vx*=-0.6;}
+        if(p.x>xmax){p.x=xmax;p.vx*=-0.6;}
+      }
+    }
+    p.trail.push({x:p.x,y:p.y});
+    if(p.trail.length>trailLen) p.trail.shift();
+  });
+}
+function t3Draw(){
+  const ctx=t3.ctx; if(!ctx) return;
+  ctx.clearRect(0,0,t3.w,t3.h);
+  drawBeaker(ctx, t3.w*0.06, t3.h*0.06, t3.w*0.88, t3.h*0.88, 'rgba(201,166,245,0.05)');
+  const ex1=t3.w*0.10, ex2=t3.w*0.90, ey1=t3.h*0.08, ey2=t3.h*0.92;
+  ctx.fillStyle = t3.fieldOn ? 'rgba(125,211,252,0.55)' : 'rgba(154,167,194,0.35)';
+  ctx.fillRect(ex1-4, ey1, 6, ey2-ey1);
+  ctx.fillRect(ex2-2, ey1, 6, ey2-ey1);
+  ctx.font='11px IBM Plex Mono'; ctx.fillStyle='rgba(232,236,246,0.55)'; ctx.textAlign='center';
+  ctx.fillText('CÁTODO (–)', ex1+18, ey1-6);
+  ctx.fillText('ÂNODO (+)', ex2-18, ey1-6);
+  t3.particles.forEach(p=>{
+    drawTrail(ctx, p, p.type==='cation' ? 'rgba(79,209,197,ALPHA)' : 'rgba(201,166,245,ALPHA)');
+    drawIon(ctx,p);
+  });
+  stateTag(ctx, t3.w*0.05, t3.h*0.035,
+    t3.fieldOn ? 'Campo ligado — migração orientada' : 'Campo desligado — movimento aleatório',
+    t3.fieldOn ? '#6FCF97' : '#9AA7C2');
+}
+toggle3.addEventListener('change', ()=>{
+  t3.fieldOn = toggle3.checked;
+  slider3.disabled = !t3.fieldOn;
+});
+slider3.addEventListener('input', ()=>{
+  t3.voltage = Number(slider3.value);
+  slider3val.textContent = slider3.value;
+});
+function t3Init(){ t3Fit(); t3Seed(); }
+
+/* ============================================================
+   TAB 4 — condutividade elétrica
+   ============================================================ */
+const t4 = {canvas:document.getElementById('canvas-t4'), ctx:null, w:0, h:0, particles:[], current:0, frac:0, powerOn:false, currentKey:'destilada', dashOffset:0};
+const bulb4 = document.getElementById('bulb-t4'), bulbLabel4 = document.getElementById('bulb-label-t4');
+const gaugeNeedle4 = document.getElementById('gauge-needle-t4'), gaugeFill4 = document.getElementById('gauge-fill-t4');
+const reading4 = document.getElementById('reading-t4');
+const toggle4 = document.getElementById('toggle-t4');
+const LIQUIDS = {
+  destilada: {label:'Água destilada', value:1, ions:2, text:'≈ 1 µS/cm'},
+  torneira:  {label:'Água da torneira', value:500, ions:10, text:'≈ 500 µS/cm'},
+  mar:       {label:'Água do mar', value:50000, ions:26, text:'≈ 50.000 µS/cm'},
+  salina:    {label:'Solução salina forte', value:210000, ions:42, text:'≈ 210.000 µS/cm'}
+};
+function t4Fit(){ const r=fitCanvas(t4.canvas); t4.ctx=r.ctx; t4.w=r.w; t4.h=r.h; }
+fitters[4]=t4Fit;
+
+function t4LogFrac(v){
+  const logv = Math.log10(Math.max(v,1));
+  return clamp(logv/5.35, 0, 1);
+}
+let t4AnimFrame=null;
+function t4RampTo(targetValue, targetFrac){
+  if(t4AnimFrame) cancelAnimationFrame(t4AnimFrame);
+  const startVal=t4.current, startFrac=t4.frac, t0=performance.now(), dur=800;
+  function step(ts){
+    const p = clamp((ts-t0)/dur,0,1);
+    t4.current = lerp(startVal,targetValue,p);
+    t4.frac = lerp(startFrac,targetFrac,p);
+    reading4.innerHTML = fmtInt(t4.current)+' <span>µS/cm</span>';
+    gaugeNeedle4.style.transform = 'rotate('+(-90+t4.frac*180)+'deg)';
+    gaugeFill4.style.strokeDashoffset = String(251.4*(1-t4.frac));
+    setBulb(bulb4, t4.frac);
+    if(p<1) t4AnimFrame = requestAnimationFrame(step);
+  }
+  t4AnimFrame = requestAnimationFrame(step);
+}
+function t4ApplyLiquid(key){
+  t4.currentKey = key;
+  document.querySelectorAll('#panel-4 .liquid-btn').forEach(b=>b.classList.toggle('active', b.dataset.liquid===key));
+  const liq = LIQUIDS[key];
+  t4.particles = [];
+  for(let i=0;i<liq.ions;i++){
+    t4.particles.push({
+      x:rand(t4.w*0.22,t4.w*0.78), y:rand(t4.h*0.24,t4.h*0.82),
+      vx:rand(-0.25,0.25), vy:rand(-0.2,0.2), r:5.5, trail:[], type: i%2===0?'cation':'anion'
+    });
+  }
+  if(t4.powerOn){
+    bulbLabel4.textContent = 'Fonte ligada — íons migrando, corrente sendo medida';
+    t4RampTo(liq.value, t4LogFrac(liq.value));
+  } else {
+    bulbLabel4.textContent = 'Fonte desligada — nenhuma corrente circula';
+    t4RampTo(0,0);
+  }
+}
+function t4SetPower(on){
+  t4.powerOn = on;
+  const liq = LIQUIDS[t4.currentKey];
+  if(on){
+    bulbLabel4.textContent = 'Fonte ligada — íons migrando, corrente sendo medida';
+    t4RampTo(liq.value, t4LogFrac(liq.value));
+  } else {
+    bulbLabel4.textContent = 'Fonte desligada — nenhuma corrente circula';
+    t4RampTo(0,0);
+  }
+}
+function t4Update(){
+  const xmin=t4.w*0.18, xmax=t4.w*0.82, ymin=t4.h*0.20, ymax=t4.h*0.86;
+  const speed = t4.powerOn ? (0.6+t4.frac*2.4) : 0;
+  const trailLen = t4.powerOn ? 9 : 4;
+  t4.particles.forEach(p=>{
+    if(!reducedMotion){
+      p.vx += rand(-0.07,0.07); p.vy += rand(-0.07,0.07);
+      if(t4.powerOn){
+        const dir = p.type==='cation'?-1:1;
+        p.vx += dir*speed*0.02;
+      }
+      p.vx*=0.96; p.vy*=0.96;
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.y<ymin){p.y=ymin;p.vy*=-0.6;}
+      if(p.y>ymax){p.y=ymax;p.vy*=-0.6;}
+      if(t4.powerOn){
+        if(p.type==='cation' && p.x<xmin){ p.x=xmax-rand(0,16); p.y=rand(ymin,ymax); p.trail=[]; }
+        if(p.type==='anion' && p.x>xmax){ p.x=xmin+rand(0,16); p.y=rand(ymin,ymax); p.trail=[]; }
+        if(p.type==='cation' && p.x>xmax){p.x=xmax;p.vx*=-0.4;}
+        if(p.type==='anion' && p.x<xmin){p.x=xmin;p.vx*=-0.4;}
+      } else {
+        if(p.x<xmin){p.x=xmin;p.vx*=-0.6;}
+        if(p.x>xmax){p.x=xmax;p.vx*=-0.6;}
+      }
+    }
+    p.trail.push({x:p.x,y:p.y});
+    if(p.trail.length>trailLen) p.trail.shift();
+  });
+  t4.dashOffset += t4.powerOn ? (1.5+t4.frac*9) : 0;
+}
+function t4Draw(){
+  const ctx=t4.ctx; if(!ctx) return;
+  ctx.clearRect(0,0,t4.w,t4.h);
+  drawBeaker(ctx, t4.w*0.06, t4.h*0.10, t4.w*0.88, t4.h*0.80, 'rgba(125,211,252,0.05)');
+  const ex1=t4.w*0.12, ex2=t4.w*0.88, elTop=t4.h*0.20, elBot=t4.h*0.84, topY=t4.h*0.045;
+  ctx.fillStyle = t4.powerOn ? 'rgba(125,211,252,0.6)' : 'rgba(154,167,194,0.32)';
+  ctx.fillRect(ex1-4, elTop, 6, elBot-elTop);
+  ctx.fillRect(ex2-2, elTop, 6, elBot-elTop);
+  ctx.strokeStyle = t4.powerOn ? 'rgba(125,211,252,0.75)' : 'rgba(154,167,194,0.28)';
+  ctx.lineWidth=2;
+  ctx.setLineDash(t4.powerOn ? [6,5] : []);
+  ctx.lineDashOffset = -t4.dashOffset;
+  ctx.beginPath(); ctx.moveTo(ex1,elTop); ctx.lineTo(ex1,topY); ctx.lineTo(t4.w*0.5-14,topY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ex2,elTop); ctx.lineTo(ex2,topY); ctx.lineTo(t4.w*0.5+14,topY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(232,236,246,0.55)'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(t4.w*0.5-14,topY-7); ctx.lineTo(t4.w*0.5-14,topY+7); ctx.stroke();
+  ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(t4.w*0.5+14,topY-4); ctx.lineTo(t4.w*0.5+14,topY+4); ctx.stroke();
+  ctx.font='9.5px IBM Plex Mono'; ctx.fillStyle='rgba(232,236,246,0.45)'; ctx.textAlign='center';
+  ctx.fillText('fonte', t4.w*0.5, topY-13);
+  t4.particles.forEach(p=>{
+    drawTrail(ctx, p, p.type==='cation' ? 'rgba(79,209,197,ALPHA)' : 'rgba(201,166,245,ALPHA)');
+    drawIon(ctx,p);
+  });
+  stateTag(ctx, t4.w*0.05, t4.h*0.035, t4.powerOn?'Fonte ligada':'Fonte desligada', t4.powerOn?'#6FCF97':'#9AA7C2');
+}
+document.querySelectorAll('#panel-4 .liquid-btn').forEach(b=>{
+  b.addEventListener('click', ()=>t4ApplyLiquid(b.dataset.liquid));
+});
+toggle4.addEventListener('change', ()=>t4SetPower(toggle4.checked));
+function t4Init(){ t4Fit(); t4ApplyLiquid('destilada'); }
+
+/* ============================================================
+   TAB 5 — diluição
+   ============================================================ */
+const t5 = {canvas:document.getElementById('canvas-t5'), ctx:null, w:0, h:0, particles:[], step:0, maxStep:6, level:0.85, animating:false};
+const bulb5 = document.getElementById('bulb-t5'), bulbLabel5 = document.getElementById('bulb-label-t5');
+const step5El = document.getElementById('step-t5'), formula5El = document.getElementById('formula-t5');
+const diluteBtn5 = document.getElementById('dilute-btn-t5'), resetBtn5 = document.getElementById('reset-btn-t5');
+
+function t5Fit(){ const r=fitCanvas(t5.canvas); t5.ctx=r.ctx; t5.w=r.w; t5.h=r.h; }
+fitters[5]=t5Fit;
+
+function t5Concentration(){ return 1/Math.pow(2, t5.step); }
+
+function t5Seed(n){
+  t5.particles = [];
+  for(let i=0;i<n;i++){
+    t5.particles.push({
+      x:rand(t5.w*0.18,t5.w*0.82), y:rand(t5.h*0.34,t5.h*0.84),
+      vx:rand(-0.25,0.25), vy:rand(-0.2,0.2), r:5.5, type:i%2===0?'cation':'anion'
+    });
+  }
+}
+function t5Reset(){
+  t5.step=0; t5.level=0.85; t5.animating=false;
+  t5Seed(24);
+  step5El.textContent='Passo 0 de '+t5.maxStep;
+  formula5El.textContent='C₀ = 1,00 mol/L (concentração de referência)';
+  setBulb(bulb5,1);
+  bulbLabel5.textContent='Solução concentrada — boa condução';
+  diluteBtn5.disabled=false;
+}
+function t5StartDilute(){
+  if(t5.step>=t5.maxStep || t5.animating) return;
+  const prevFrac = t5Concentration();
+  t5.step++;
+  t5.animating = true;
+  t5.animStart = performance.now();
+  t5.animDur = 1100;
+  const frac = t5Concentration();
+  const targetN = Math.max(2, Math.round(24*frac));
+  const shuffled = [...t5.particles].sort(()=>Math.random()-0.5);
+  shuffled.forEach((p,i)=>{
+    if(i<targetN){
+      p.dying=false; p.sx=p.x; p.sy=p.y;
+      p.tx=rand(t5.w*0.16,t5.w*0.84); p.ty=rand(t5.h*0.30,t5.h*0.86);
+    } else { p.dying=true; p.life=1; }
+  });
+  step5El.textContent = 'Passo '+t5.step+' de '+t5.maxStep;
+  formula5El.textContent = 'C₁V₁=C₂V₂ → '+prevFrac.toFixed(3)+' × 50 mL = C₂ × 100 mL → C₂ = '+frac.toFixed(3)+' mol/L';
+  bulbLabel5.textContent = 'Metade sai, água entra — concentração caindo';
+  diluteBtn5.disabled = true;
+}
+function t5Update(){
+  if(t5.animating){
+    const t = clamp((performance.now()-t5.animStart)/t5.animDur,0,1);
+    if(t<0.42){
+      t5.level = lerp(0.85,0.45, t/0.42);
+      t5.particles.forEach(p=>{ if(p.dying) p.life = clamp(1-(t/0.42),0,1); });
+    } else {
+      t5.level = lerp(0.45,0.85, (t-0.42)/0.58);
+      const e = 1-Math.pow(1-((t-0.42)/0.58),3);
+      t5.particles.forEach(p=>{ if(!p.dying){ p.x=lerp(p.sx,p.tx,e); p.y=lerp(p.sy,p.ty,e); } });
+    }
+    if(t>=1){
+      t5.particles = t5.particles.filter(p=>!p.dying);
+      t5.particles.forEach(p=>{ p.vx=rand(-0.2,0.2); p.vy=rand(-0.15,0.15); });
+      t5.animating=false; t5.level=0.85;
+      const frac = t5Concentration();
+      setBulb(bulb5, frac);
+      if(t5.step>=t5.maxStep){ bulbLabel5.textContent='Solução já está extremamente diluída — quase não resta soluto detectável'; diluteBtn5.disabled=true; }
+      else { bulbLabel5.textContent = frac>0.2 ? 'Concentração reduzida — condução mais fraca' : 'Quase sem íons detectáveis — condução muito fraca'; diluteBtn5.disabled=false; }
+    }
+    return;
+  }
+  if(reducedMotion) return;
+  const b = t5Bounds();
+  t5.particles.forEach(p=>{
+    p.vx+=rand(-0.06,0.06); p.vy+=rand(-0.06,0.06);
+    p.vx*=0.97; p.vy*=0.97;
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<b.xmin){p.x=b.xmin;p.vx*=-0.7;}
+    if(p.x>b.xmax){p.x=b.xmax;p.vx*=-0.7;}
+    if(p.y<b.ymin){p.y=b.ymin;p.vy*=-0.7;}
+    if(p.y>b.ymax){p.y=b.ymax;p.vy*=-0.7;}
+  });
+}
+function t5Bounds(){
+  const x=t5.w*0.06, y=t5.h*0.08, w=t5.w*0.88, h=t5.h*0.84, slant=w*0.07;
+  const fillTop = y + h*(1-t5.level);
+  return {xmin:x+slant+14, xmax:x+w-slant-14, ymin:Math.max(fillTop+12,y+16), ymax:y+h-14};
+}
+function t5Draw(){
+  const ctx=t5.ctx; if(!ctx) return;
+  ctx.clearRect(0,0,t5.w,t5.h);
+  const x=t5.w*0.06, y=t5.h*0.08, w=t5.w*0.88, h=t5.h*0.84, botW=w*0.86, slant=(w-botW)/2;
+  const path = new Path2D();
+  path.moveTo(x,y); path.lineTo(x+w,y); path.lineTo(x+w-slant,y+h); path.lineTo(x+slant,y+h); path.closePath();
+  const frac = t5Concentration();
+  const liquidAlpha = 0.05+frac*0.24;
+  const fillTop = y + h*(1-t5.level);
+  ctx.save();
+  ctx.clip(path);
+  ctx.fillStyle = 'rgba(251,227,138,'+liquidAlpha+')';
+  ctx.fillRect(x-4, fillTop, w+8, (y+h)-fillTop+20);
+  ctx.strokeStyle='rgba(251,227,138,0.45)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x-4,fillTop); ctx.lineTo(x+w+4,fillTop); ctx.stroke();
+  ctx.restore();
+  ctx.strokeStyle='rgba(232,236,246,0.30)'; ctx.lineWidth=1.5;
+  ctx.stroke(path);
+  t5.particles.forEach(p=>drawIon(ctx,p, p.dying? (p.life===undefined?1:p.life) : 1));
+  const cat = t5.step===0?'Concentrada':(frac>0.2?'Diluindo':'Quase sem soluto');
+  stateTag(ctx, t5.w*0.05, t5.h*0.03, cat, t5.step===0?'#6FCF97':(frac>0.2?'#FBE38A':'#9AA7C2'));
+}
+diluteBtn5.addEventListener('click', t5StartDilute);
+resetBtn5.addEventListener('click', t5Reset);
+function t5Init(){ t5Fit(); t5Reset(); }
+
+/* ============================================================
+   TAB 6 — comparação entre soluções
+   ============================================================ */
+const t6 = {canvas:document.getElementById('canvas-t6'), ctx:null, w:0, h:0, cards:[], ascending:true};
+const sortBtn6 = document.getElementById('sort-btn-t6');
+const SUBSTANCES6 = [
+  {name:'Água destilada', value:1, text:'≈ 1 µS/cm', ions:2},
+  {name:'Solução de açúcar', value:2, text:'≈ 2 µS/cm', ions:2},
+  {name:'Água da torneira', value:500, text:'≈ 500 µS/cm', ions:9},
+  {name:'Vinagre diluído', value:400, text:'≈ 400 µS/cm', ions:8},
+  {name:'Água do mar', value:50000, text:'≈ 50.000 µS/cm', ions:20},
+  {name:'NaCl saturado', value:210000, text:'≈ 210.000 µS/cm', ions:30}
+];
+function t6Fit(){ const r=fitCanvas(t6.canvas); t6.ctx=r.ctx; t6.w=r.w; t6.h=r.h; t6Layout(); }
+fitters[6]=t6Fit;
+
+function t6LogFrac(v){ return clamp(Math.log10(Math.max(v,1))/5.35,0,1); }
+
+function t6Layout(){
+  const cols=3, rows=2;
+  const cw = t6.w/cols, ch = t6.h/rows;
+  t6.slotPositions = [];
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      t6.slotPositions.push({x:c*cw+cw*0.08, y:r*ch+ch*0.08, w:cw*0.84, h:ch*0.72});
+    }
+  }
+  if(!t6.cards.length){
+    t6.cards = SUBSTANCES6.map((s,i)=>{
+      const particles=[];
+      for(let k=0;k<s.ions;k++){
+        particles.push({dx:rand(0.15,0.85),dy:rand(0.25,0.85),vx:rand(-0.2,0.2),vy:rand(-0.15,0.15),type:k%2===0?'cation':'anion'});
+      }
+      return {...s, rank:i, curX:t6.slotPositions[i].x, curY:t6.slotPositions[i].y, particles};
+    });
+  } else {
+    t6.cards.forEach(card=>{ /* keep rank, positions retargeted on next frame */ });
+  }
+}
+function t6ApplyOrder(){
+  const sorted = [...t6.cards].sort((a,b)=> t6.ascending ? a.value-b.value : b.value-a.value);
+  sorted.forEach((card,i)=>{ card.rank=i; });
+}
+function t6Update(){
+  t6.cards.forEach(card=>{
+    const slot = t6.slotPositions[card.rank];
+    card.curX = lerp(card.curX, slot.x, 0.08);
+    card.curY = lerp(card.curY, slot.y, 0.08);
+    if(!reducedMotion){
+      const energy = 0.15+t6LogFrac(card.value)*1.1;
+      card.particles.forEach(p=>{
+        p.vx+=rand(-0.02,0.02)*energy; p.vy+=rand(-0.02,0.02)*energy;
+        p.vx*=0.95; p.vy*=0.95;
+        p.dx+=p.vx*0.01; p.dy+=p.vy*0.01;
+        p.dx=clamp(p.dx,0.1,0.9); p.dy=clamp(p.dy,0.15,0.9);
+      });
+    }
+  });
+}
+function t6Draw(){
+  const ctx=t6.ctx; if(!ctx) return;
+  ctx.clearRect(0,0,t6.w,t6.h);
+  const slot0 = t6.slotPositions[0];
+  const sw = slot0 ? slot0.w : 100, sh = slot0 ? slot0.h : 100;
+  t6.cards.forEach(card=>{
+    const x=card.curX, y=card.curY;
+    const bk = drawBeaker(ctx, x, y, sw*0.62, sh*0.62, 'rgba(255,158,122,0.05)');
+    card.particles.forEach(p=>{
+      const px = bk.xmin+p.dx*(bk.xmax-bk.xmin);
+      const py = bk.ymin+p.dy*(bk.ymax-bk.ymin);
+      drawIon(ctx,{x:px,y:py,r:3.4,type:p.type});
+    });
+    const frac = t6LogFrac(card.value);
+    const labelY = y+sh*0.62+16;
+    if(frac>0.03){
+      ctx.beginPath(); ctx.arc(x+4, labelY-4, 4,0,Math.PI*2);
+      ctx.fillStyle='rgba(111,207,151,'+(0.4+frac*0.6)+')';
+      ctx.shadowColor='rgba(111,207,151,0.85)'; ctx.shadowBlur=5+frac*9;
+      ctx.fill(); ctx.shadowBlur=0;
+    } else {
+      ctx.beginPath(); ctx.arc(x+4, labelY-4, 4,0,Math.PI*2);
+      ctx.fillStyle='rgba(154,167,194,0.35)'; ctx.fill();
+    }
+    ctx.fillStyle='rgba(232,236,246,0.85)';
+    ctx.font='600 11.5px IBM Plex Sans'; ctx.textAlign='left';
+    ctx.fillText(card.name, x+15, labelY);
+    ctx.fillStyle='rgba(154,167,194,0.75)';
+    ctx.font='11px IBM Plex Mono';
+    ctx.fillText(card.text, x, y+sh*0.62+31);
+    const barW = sw*0.62;
+    ctx.fillStyle='rgba(40,55,92,0.6)';
+    ctx.fillRect(x, y+sh*0.62+40, barW, 5);
+    ctx.fillStyle='rgba(111,207,151,0.85)';
+    ctx.fillRect(x, y+sh*0.62+40, barW*frac, 5);
+  });
+}
+sortBtn6.addEventListener('click', ()=>{
+  t6.ascending = !t6.ascending;
+  sortBtn6.textContent = t6.ascending ? 'Ordenar: menor → maior condutividade' : 'Ordenar: maior → menor condutividade';
+  t6ApplyOrder();
+});
+function t6Init(){ t6Fit(); t6ApplyOrder(); }
+
+/* ============================================================
+   RENDER LOOP
+   ============================================================ */
+const inits = {1:t1Init, 2:t2Init, 3:t3Init, 4:t4Init, 5:t5Init, 6:t6Init};
+
+function frame(){
+  switch(activeTab){
+    case 1: t1Update(); t1Draw(); break;
+    case 2: t2Update(); t2Draw(); t2GraphDraw(); break;
+    case 3: t3Update(); t3Draw(); break;
+    case 4: t4Update(); t4Draw(); break;
+    case 5: t5Update(); t5Draw(); break;
+    case 6: t6Update(); t6Draw(); break;
+  }
+  requestAnimationFrame(frame);
+}
+
+/* init first tab and start loop */
+t1Init(); initialized[1]=true;
+requestAnimationFrame(frame);
+
+/* ============================================================
+   QUIZ
+   ============================================================ */
+const quizData = [
+  {q:'Qual cientista propôs, em 1884, a teoria da dissociação eletrolítica?', options:['Michael Faraday','Svante Arrhenius','Friedrich Kohlrausch','Wilhelm Ostwald'], correct:1, explain:'Arrhenius apresentou a teoria em sua tese de doutorado, o que lhe rendeu o Nobel de Química em 1903.'},
+  {q:'Por que uma solução de sacarose (açúcar) em água não conduz corrente elétrica?', options:['Porque o açúcar é insolúvel em água','Porque as moléculas se dissolvem inteiras, sem formar íons','Porque falta eletrodo suficiente no circuito','Porque a água pura já conduz sozinha'], correct:1, explain:'A sacarose é um não eletrólito: dissolve-se como molécula neutra, sem liberar cargas livres.'},
+  {q:'O que acontece com a concentração de íons quando uma solução é diluída, mantendo constante a quantidade de soluto?', options:['Aumenta','Permanece igual','Diminui, pois o mesmo número de mols ocupa um volume maior','Torna-se zero imediatamente'], correct:2, explain:'Com mais solvente e a mesma quantidade de soluto, a concentração (mol/L) cai — é a base da relação C₁V₁=C₂V₂.'},
+  {q:'Em uma solução com eletrodos, para onde migram os cátions quando o circuito é fechado?', options:['Para o ânodo (eletrodo positivo)','Para o cátodo (eletrodo negativo)','Ficam parados no centro da solução','Migram de forma totalmente aleatória'], correct:1, explain:'Cátions têm carga positiva e são atraídos pelo eletrodo negativo, o cátodo.'},
+  {q:'Qual das opções abaixo costuma ter a MAIOR condutividade elétrica?', options:['Água destilada','Solução de açúcar','Água da torneira','Água do mar'], correct:3, explain:'A água do mar é rica em íons dissolvidos (Na⁺, Cl⁻, Mg²⁺ e outros), muito acima da água destilada ou de torneira.'},
+  {q:'Segundo a lei da diluição de Ostwald, o que ocorre com o grau de ionização (α) de um eletrólito fraco ao ser diluído?', options:['Diminui','Aumenta','Permanece sempre constante','Vai a zero imediatamente'], correct:1, explain:'Para eletrólitos fracos, diluir a solução desloca o equilíbrio de ionização, aumentando o grau de ionização α.'},
+  {q:'Por que a temperatura deve ser controlada ao comparar a condutividade de diferentes soluções?', options:['A temperatura não afeta a condutividade','O calor destrói os íons presentes','A mobilidade dos íons muda com a temperatura, alterando a leitura','Só é possível medir condutividade a 0 °C'], correct:2, explain:'Íons se movem mais rápido em temperaturas mais altas, então comparações justas exigem temperatura padronizada (geralmente 25 °C).'},
+  {q:'O que a relação C₁V₁ = C₂V₂ permite calcular?', options:['A massa molar do soluto','A concentração final após uma diluição, a partir da concentração e volume iniciais','O número de elétrons livres na solução','A temperatura de ebulição da solução'], correct:1, explain:'Essa relação de diluição parte da conservação da quantidade de mols de soluto ao variar o volume da solução.'}
+];
+let quizIndex=0, quizScore=0, quizAnswered=false;
+const quizProgressEl=document.getElementById('quiz-progress'), quizProgressBarEl=document.getElementById('quiz-progressbar-fill');
+const quizQuestionEl=document.getElementById('quiz-question'), quizOptionsEl=document.getElementById('quiz-options');
+const quizFeedbackEl=document.getElementById('quiz-feedback'), quizNextBtn=document.getElementById('quiz-next-btn');
+const quizActiveEl=document.getElementById('quiz-active'), quizResultEl=document.getElementById('quiz-result');
+const quizScoreNumEl=document.getElementById('quiz-score-num'), quizResultMsgEl=document.getElementById('quiz-result-msg');
+const quizRestartBtn=document.getElementById('quiz-restart-btn');
+
+function renderQuiz(){
+  const item = quizData[quizIndex];
+  quizProgressEl.textContent = 'Pergunta '+(quizIndex+1)+' de '+quizData.length;
+  quizProgressBarEl.style.width = (((quizIndex)/quizData.length)*100)+'%';
+  quizQuestionEl.textContent = item.q;
+  quizOptionsEl.innerHTML='';
+  item.options.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='quiz-option';
+    b.textContent=opt;
+    b.addEventListener('click', ()=>answerQuiz(i));
+    quizOptionsEl.appendChild(b);
+  });
+  quizFeedbackEl.textContent='';
+  quizFeedbackEl.className='quiz-feedback';
+  quizNextBtn.style.display='none';
+  quizAnswered=false;
+}
+function answerQuiz(i){
+  if(quizAnswered) return;
+  quizAnswered=true;
+  const item = quizData[quizIndex];
+  const buttons = quizOptionsEl.querySelectorAll('.quiz-option');
+  buttons.forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===item.correct) b.classList.add('correct');
+    else if(idx===i) b.classList.add('incorrect');
+  });
+  if(i===item.correct){
+    quizScore++;
+    quizFeedbackEl.innerHTML = '<b>Certo.</b> '+item.explain;
+    quizFeedbackEl.classList.add('feedback-correct');
+  } else {
+    quizFeedbackEl.innerHTML = '<b>Não foi dessa vez.</b> '+item.explain;
+    quizFeedbackEl.classList.add('feedback-incorrect');
+  }
+  quizProgressBarEl.style.width = (((quizIndex+1)/quizData.length)*100)+'%';
+  quizNextBtn.style.display='inline-flex';
+  quizNextBtn.textContent = (quizIndex===quizData.length-1) ? 'Ver resultado' : 'Próxima pergunta';
+}
+quizNextBtn.addEventListener('click', ()=>{
+  quizIndex++;
+  if(quizIndex>=quizData.length){ showQuizResult(); return; }
+  renderQuiz();
+});
+function showQuizResult(){
+  quizActiveEl.style.display='none';
+  quizResultEl.style.display='block';
+  quizScoreNumEl.textContent = quizScore;
+  let msg;
+  if(quizScore===quizData.length) msg='Domínio completo dos conceitos de condutividade em solução.';
+  else if(quizScore>=quizData.length-2) msg='Muito bom — os principais conceitos estão consolidados.';
+  else if(quizScore>=quizData.length/2) msg='Bom começo. Vale revisar as abas com respostas erradas.';
+  else msg='Vale a pena revisar os seis tópicos acima antes de tentar novamente.';
+  quizResultMsgEl.textContent = msg;
+}
+quizRestartBtn.addEventListener('click', ()=>{
+  quizIndex=0; quizScore=0;
+  quizActiveEl.style.display='block';
+  quizResultEl.style.display='none';
+  renderQuiz();
+});
+renderQuiz();
+</script>
+</body>
+</html>
